@@ -7,25 +7,28 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import ru.rgs.framework.managers.DriverManager;
+import ru.rgs.framework.managers.PageManager;
 
 import java.util.concurrent.TimeUnit;
 
 public class BasePage {
 
-    protected WebDriver driver;
-    protected WebDriverWait wait;
-    protected Actions actions;
-    protected JavascriptExecutor jsExecutor;
+    protected DriverManager driverManager = DriverManager.getInstance();
+    protected WebDriver driver = driverManager.getDriver();
+    protected WebDriverWait wait = new WebDriverWait(driverManager.getDriver(), 10, 1000);
+    protected Actions actions = new Actions(driverManager.getDriver());
+    protected JavascriptExecutor jsExecutor = (JavascriptExecutor) driverManager.getDriver();
+    protected PageManager pageManager = PageManager.getInstance();
 
-
-
-    public BasePage(WebElement driver){
-        PageFactory.initElements(driver, this);
+    public BasePage() {
+        PageFactory.initElements(driverManager.getDriver(), this);
     }
 
     /**
      * Проверка наличия элемента на странице
-     * @param by - передается xpath проверяемого объекта на странице
+     *
+     * @param by   - передается xpath проверяемого объекта на странице
      * @param time - периодичность, с которой будет проверяться появился ли элемент
      * @return - возвращает, либо true, либо false, в зависимости от того найден элемент в итоге или нет
      */
@@ -44,6 +47,7 @@ public class BasePage {
 
     /**
      * Преобразовывает переданную строку номера телефона и преобразовывает её для проверки
+     *
      * @param value - строка из чисел, которую надо преобразовать
      * @return - возвращает телефон в нужном формате для дальнейшей проверки
      */
@@ -55,6 +59,7 @@ public class BasePage {
      * Функция, которая ожидает стабильности страницы на сайте, как правило, используется для проверки можно ли со страницей работать дальше.
      * Проверяется путём сравнения html страницы с её предыдущими состояниями за каждый переданный промежуток времени
      * Как только они состояния совпадут, будет выход из функции
+     *
      * @param maxWaitMillis - Максимальное время ожидания стабилизации
      * @param pollDelimiter - Интервал времени, с которым будет проверяться стабилизировалась страница или нет
      */
@@ -95,5 +100,28 @@ public class BasePage {
         } finally {
             driver.switchTo().defaultContent();     // переключаемся на начальный драйвер, то есть к базовой странице
         }
+    }
+
+    /**
+     * Явное ожидание состояния clickable элемента
+     *
+     * @param element - веб-элемент который требует проверки clickable
+     * @return WebElement - возвращаем тот же веб элемент, что был передан в функцию
+     * @see WebDriverWait
+     * @see org.openqa.selenium.support.ui.FluentWait
+     * @see org.openqa.selenium.support.ui.Wait
+     * @see ExpectedConditions
+     */
+    protected WebElement waitUtilElementToBeClickable(WebElement element) {
+        return wait.until(ExpectedConditions.elementToBeClickable(element));
+    }
+
+    /**
+     * Явное ожидание того, что элемент станет видимым
+     *
+     * @param element - веб элемент, который мы ожидаем, что будет виден на странице
+     */
+    protected WebElement waitUtilElementToBeVisible(WebElement element) {
+        return wait.until(ExpectedConditions.visibilityOf(element));
     }
 }

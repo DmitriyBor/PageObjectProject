@@ -6,46 +6,49 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import ru.rgs.framework.managers.PageManager;
 
 import java.util.List;
 
 public class StartPage extends BasePage {
 
-    @FindBy(xpath = "//div[@class='cookie block--cookie']")
+    @FindBy(xpath = "//div[@class='cookie block--cookie']//button")
     private WebElement closeCookie;
 
     @FindBy(xpath = "//a[@data-v-2642864c]")
     private List<WebElement> baseMenu;
 
-    public StartPage(WebElement driver){
-        super(driver);
-        PageFactory.initElements(driver, this);
+    public StartPage pageStability(){
+        waitForPageStability(10000, 2000);
+        return pageManager.getStartPage();
     }
 
     /**
-     * Если есть окно Cookie, то проверяет его наличие и закрывает его
+     * Закрывает окно Cookie
      */
-    public void closeCookies() {
+    public StartPage closeCookies() {
         // Проверка на наличие куки
         waitAndCloseWidget();
-        if (elementIsExist(closeCookie, 2)) {
-            WebElement closeCookieBtn = driver.findElement(By.xpath("//div[@class='cookie block--cookie']//button"));
-            closeCookieBtn.click();
-        }
+        waitUtilElementToBeClickable(closeCookie).click();
+        return pageManager.getStartPage();
     }
 
     /**
      * Клик по базовому меню - меню выбирается по тексту переданному на вход функции
+     *
      * @param nameMenu - Текст, который будет передан пользователем (наименования базового меню)
      */
-    public void selectBaseMenuByText(String nameMenu){
+    public ForCompaniesPage selectBaseMenuByText(String nameMenu) {
         waitAndCloseWidget();
-        for (WebElement itemMenu: baseMenu) {
-            if (itemMenu.getText().contains(nameMenu)){
+        for (WebElement itemMenu : baseMenu) {
+            if (itemMenu.getText().contains(nameMenu)) {
                 itemMenu.click();
+                return pageManager.getForCompaniesPage();
             }
         }
-        Assertion.fail("Меню с текстом " + nameMenu + " не найдено на стартовой страничке");
+        return pageManager.getForCompaniesPage();
+//        Assertion.fail("Меню с текстом " + nameMenu + " не найдено на стартовой страничке");
 //        wait.until(ExpectedConditions.titleIs("Страхование компаний и юридических лиц | Росгосстрах"));
     }
 }
